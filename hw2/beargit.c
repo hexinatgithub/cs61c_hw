@@ -160,7 +160,7 @@ int is_commit_msg_ok(const char* msg) {
   return 0;
 }
 
-void next_commit_id(char* commit_id) {
+void next_commit_id_hw1(char* commit_id) {
   /* COMPLETE THE REST */
   uint32_t i = 0;
 
@@ -190,7 +190,7 @@ void next_commit_id(char* commit_id) {
 End: return;
 }
 
-int beargit_commit(const char* msg) {
+int beargit_commit_hw1(const char* msg) {
   if (!is_commit_msg_ok(msg)) {
     fprintf(stderr, "ERROR: Message must contain \"%s\"\n", go_bears);
     return 1;
@@ -364,7 +364,21 @@ int get_branch_number(const char* branch_name) {
 
 int beargit_branch() {
   /* COMPLETE THE REST */
+  FILE* findex = fopen(".beargit/.branches", "r");
+  char line[BRANCHNAME_SIZE];
+  char current_branch[BRANCHNAME_SIZE];
 
+  read_string_from_file(".beargit/.current_branch", current_branch, BRANCHNAME_SIZE);
+  strtok(current_branch, "\n");
+  while(fgets(line, sizeof(line), findex)) {
+    strtok(line, "\n");
+    if (strcmp(line, current_branch) == 0)
+      fprintf(stdout, "* %s\n", line);
+    else
+      fprintf(stdout, "  %s\n", line);
+  }
+
+  fclose(findex);
   return 0;
 }
 
@@ -376,18 +390,32 @@ int beargit_branch() {
 
 int checkout_commit(const char* commit_id) {
   /* COMPLETE THE REST */
+
   return 0;
 }
 
 int is_it_a_commit_id(const char* commit_id) {
   /* COMPLETE THE REST */
+  if (strlen(commit_id) != 40) {
+    return 0;
+  }
+  
+  while(*commit_id != '\0'){
+    char a = *commit_id;
+    if (a == '6' || a == '1' || a == 'c') {
+      commit_id++;
+      continue;
+    }
+    return 0;
+  }
+  
   return 1;
 }
 
 int beargit_checkout(const char* arg, int new_branch) {
   // Get the current branch
   char current_branch[BRANCHNAME_SIZE];
-  read_string_from_file(".beargit/.current_branch", "current_branch", BRANCHNAME_SIZE);
+  read_string_from_file(".beargit/.current_branch", current_branch, BRANCHNAME_SIZE);
 
   // If not detached, update the current branch by storing the current HEAD into that branch's file...
   // Even if we cancel later, this is still ok.
@@ -423,13 +451,13 @@ int beargit_checkout(const char* arg, int new_branch) {
   if (!(!branch_exists || !new_branch)) {
     fprintf(stderr, "ERROR: A branch named %s already exists\n", branch_name);
     return 1;
-  } else if (!branch_exists && new_branch) {
+  } else if (!branch_exists && !new_branch) {
     fprintf(stderr, "ERROR: No branch %s exists\n", branch_name);
     return 1;
   }
 
   // File for the branch we are changing into.
-  char* branch_file = ".beargit/.branch_"; 
+  char branch_file[FILENAME_SIZE] = ".beargit/.branch_";
   strcat(branch_file, branch_name);
 
   // Update the branch file if new branch is created (now it can't go wrong anymore)
