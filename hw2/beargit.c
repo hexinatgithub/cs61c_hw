@@ -390,7 +390,37 @@ int beargit_branch() {
 
 int checkout_commit(const char* commit_id) {
   /* COMPLETE THE REST */
+  write_string_to_file(".beargit/.prev", commit_id);
 
+  if (strcmp(commit_id, "0000000000000000000000000000000000000000") == 0) {
+    write_string_to_file(".beargit/.index", "");
+    return 0;
+  }
+
+  FILE* findex = fopen(".beargit/.index", "r");
+  char line[FILENAME_SIZE];
+
+  while(fgets(line, sizeof(line), findex)) {
+    strtok(line, "\n");
+    fs_rm(line);
+  }
+
+  fclose(findex);
+  
+  char tmp1[FILENAME_SIZE];
+  sprintf(tmp1, ".beargit/%s/.index", commit_id);
+  fs_cp(tmp1, ".beargit/.index");
+
+  char tmp2[FILENAME_SIZE];
+  findex = fopen(".beargit/.index", "r");
+  while(fgets(line, sizeof(line), findex)) {
+    strtok(line, "\n");
+    sprintf(tmp1, ".beargit/%s/%s", commit_id, line);
+    sprintf(tmp2, "./%s", line);
+    fs_cp(tmp1, tmp2);
+  }
+
+  fclose(findex);
   return 0;
 }
 
@@ -400,7 +430,7 @@ int is_it_a_commit_id(const char* commit_id) {
     return 0;
   }
   
-  while(*commit_id != '\0'){
+  while(*commit_id != '\0') {
     char a = *commit_id;
     if (a == '6' || a == '1' || a == 'c') {
       commit_id++;
@@ -448,7 +478,7 @@ int beargit_checkout(const char* arg, int new_branch) {
   int branch_exists = (get_branch_number(branch_name) >= 0);
 
   // Check for errors.
-  if (!(!branch_exists || !new_branch)) {
+  if (branch_exists && new_branch) {
     fprintf(stderr, "ERROR: A branch named %s already exists\n", branch_name);
     return 1;
   } else if (!branch_exists && !new_branch) {
