@@ -137,6 +137,83 @@ void simple_log_test(void)
     free_commit_list(&commit_list);
 }
 
+/* Test beargit checkout function
+   Save a file then checkout to other new branch to overwrite the 
+   file content,
+   then checkout back to pre master branch to see file content is whether restored.
+ */
+void checkout_branch(void) {
+   struct commit* commit_list = NULL;
+   int retval;
+   const int LINE_SIZE = 512;
+   char refline[LINE_SIZE];
+   retval = beargit_init();
+   CU_ASSERT(0==retval);
+
+   write_string_to_file("test.txt", "test_commit1");
+   retval = beargit_add("test.txt");
+   CU_ASSERT(0==retval);
+   run_commit(&commit_list, "GO BEARS!1");
+
+   retval = beargit_checkout("test", 1);
+   write_string_to_file("test.txt", "test_commit2");
+   CU_ASSERT(0==retval);
+   run_commit(&commit_list, "GO BEARS!2");
+
+   retval = beargit_checkout("master", 0);
+   CU_ASSERT(0==retval);
+   read_string_from_file("test.txt", refline, LINE_SIZE);
+   strtok(refline, "\n");
+   retval = strcmp("test_commit1", refline);
+   CU_ASSERT(0==retval);
+
+   retval = beargit_checkout("test", 0);
+   CU_ASSERT(0==retval);
+   read_string_from_file("test.txt", refline, LINE_SIZE);
+   strtok(refline, "\n");
+   retval = strcmp("test_commit2", refline);
+   CU_ASSERT(0==retval);
+
+   free_commit_list(&commit_list);
+}
+
+void branch_list(void) {
+  int retval;
+  retval = beargit_init();
+  CU_ASSERT(0==retval);
+
+  retval = beargit_checkout("test", 1);
+  CU_ASSERT(0==retval);
+
+  retval = beargit_branch();
+  CU_ASSERT(0==retval);
+
+  FILE* findex = fopen("./TEST_STDOUT", "r");
+  char line[BRANCHNAME_SIZE];
+  int i = 0;
+  while(fgets(line, sizeof(line), findex)) {
+    strtok(line, "\n");
+    if (i == 0) {
+      retval = strcmp("  master", line);
+      CU_ASSERT(0==retval);
+    }
+    
+    if (i == 1) {
+      retval = strcmp("* test", line);
+      CU_ASSERT(0==retval);
+    }
+
+    if (i == 2) {
+      retval = strcmp("\n", line);
+      CU_ASSERT(0==retval);
+    }
+
+    i++;
+  }
+
+  fclose(findex);
+}
+
 /* The main() function for setting up and running the tests.
  * Returns a CUE_SUCCESS on successful running, another
  * CUnit error code on failure.
@@ -145,6 +222,8 @@ int cunittester()
 {
    CU_pSuite pSuite = NULL;
    CU_pSuite pSuite2 = NULL;
+   CU_pSuite pSuite3 = NULL;
+   CU_pSuite pSuite4 = NULL;
 
    /* initialize the CUnit test registry */
    if (CUE_SUCCESS != CU_initialize_registry())
@@ -172,6 +251,32 @@ int cunittester()
 
    /* Add tests to the Suite #2 */
    if (NULL == CU_add_test(pSuite2, "Log output test", simple_log_test))
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+
+   pSuite3 = CU_add_suite("Suite_3", init_suite, clean_suite);
+   if (NULL == pSuite3) {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+
+   /* Add tests to the Suite #3 */
+   if (NULL == CU_add_test(pSuite3, "Checkout branch test", checkout_branch))
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+
+   pSuite4 = CU_add_suite("Suite_4", init_suite, clean_suite);
+   if (NULL == pSuite3) {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+
+   /* Add tests to the Suite #4 */
+   if (NULL == CU_add_test(pSuite4, "Branch list test", branch_list))
    {
       CU_cleanup_registry();
       return CU_get_error();
