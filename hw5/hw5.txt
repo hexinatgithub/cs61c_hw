@@ -1,0 +1,98 @@
+======= Problem 1 =======
+(a.1)
+tag = 4
+set index = 10
+block offset = 2
+
+(a.2)
+Address | Cache Hit / Miss | Miss Type (Compulsory, Capacity, or Conflict)
+0x0000  |       Miss       |    Compulsory
+0x0004  |       Miss       |    Compulsory
+0x0008  |       Miss       |    Compulsory
+0x000c  |       Miss       |    Compulsory
+0x1000  |       Miss       |    Conflict
+0x1004  |       Miss       |    Conflict
+0x1008  |       Miss       |    Conflict
+0x100c  |       Miss       |    Conflict
+0x0000  |       Miss       |    Conflict
+0x0004  |       Miss       |    Conflict
+0x0008  |       Miss       |    Conflict
+0x000c  |       Miss       |    Conflict
+
+(a.3)
+Miss rate = 100%
+AMAT = 1 + 100% * 102 = 103
+(no cache time) - AMAT = 2
+
+(b.1)
+tag = 4
+set index = 9
+block offset = 3
+
+(b.2)
+Address | Cache Hit / Miss | Miss Type (Compulsory, Capacity, or Conflict)
+0x0000  |       Miss       |    Compulsory
+0x0004  |       Hit        |    
+0x0008  |       Miss       |    Compulsory
+0x000c  |       Hit        |
+0x1000  |       Miss       |    Compulsory
+0x1004  |       Hit        |
+0x1008  |       Miss       |    Compulsory
+0x100c  |       Hit        |
+0x0000  |       Miss       |    Conflict
+0x0004  |       Hit        |
+0x0008  |       Miss       |    Conflict
+0x000c  |       Hit        |
+
+(b.3)
+miss rate = 50%
+hit time = 2
+miss time = 110
+AMAT = 1 + 50% * 112 = 57
+(no cache time) - AMAT = 113 - 57 = 56
+
+(c.1)
+tag = 5
+set index = 8
+block offset = 3
+
+(c.2)
+Address | Cache Hit / Miss | Miss Type (Compulsory, Capacity, or Conflict)
+0x0000  |       Miss       |    Compulsory
+0x0004  |       Hit        |
+0x0008  |       Miss       |    Compulsory
+0x000c  |       Hit        |
+0x1000  |       Miss       |    Compulsory
+0x1004  |       Hit        |
+0x1008  |       Miss       |    Compulsory
+0x100c  |       Hit        |
+0x0000  |       Hit        |
+0x0004  |       Hit        |
+0x0008  |       Hit        |
+0x000c  |       Hit        |
+
+(c.3)
+miss rate = 33%
+hit time = 3
+miss time = 110
+AMAT = 1 + 33% * 113 = 38
+(no cache time) - AMAT = 113 - 38 = 75
+
+======= Problem 2 =======
+a. 99.2%
+b. 
+for (j = 0 ; j < 256 ; j++) {
+    for (i = 0 ; i < 255 ; i++) {
+        array[256*j] += array[256*j + i + 1];
+    }
+}
+12.5% miss rate
+
+c. yes, every loop will evict element from previous.
+
+======= Problem 3 =======
+a. 1 100100 0000000000000000001010011
+b. 1 101001 1010100010000000000000000 = -1698
+c. 134217728
+d. 2 ** -30
+e. 2 ** - 55
